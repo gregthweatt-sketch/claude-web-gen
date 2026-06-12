@@ -1,0 +1,21 @@
+---
+---
+<footer>
+  <p>© 2025 Greg Thweatt · Southern Oregon · <a href="https://gregthweatt.com/" target="_blank" rel="noopener">gregthweatt.com</a></p>
+</footer>
+
+<span id="back-top-label">Top</span>
+<button id="back-top" aria-label="Back to top" title="Back to top">↑</button>
+
+<script>
+  const backTop = document.getElementById('back-top')!;
+  const backTopLabel = document.getElementById('back-top-label')!;
+  window.addEventListener('scroll', () => {
+    const show = window.scrollY > 300;
+    backTop.classList.toggle('visible', show);
+    backTopLabel.classList.toggle('visible', show);
+  });
+  backTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>

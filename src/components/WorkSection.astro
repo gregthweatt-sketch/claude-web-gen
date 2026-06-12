@@ -1,0 +1,193 @@
+---
+interface Project {
+  emoji: string;
+  tags: { label: string; cls: string }[];
+  title: string;
+  description: string;
+  linkLabel: string;
+  href: string;
+}
+
+const projects: Project[] = [
+  {
+    emoji: '📊',
+    tags: [
+      { label: 'Prof. Development & Training', cls: 'tag-training' },
+      { label: 'Documentation', cls: 'tag-documentation' },
+    ],
+    title: 'I-Trac Reports User Manual',
+    description: 'Developed a comprehensive user manual for the Worksystems Inc. I-Trac® Power BI reporting platform. Written in Microsoft Word to support frontline workforce program staff. Shared with expressed permission from Worksystems Inc.',
+    linkLabel: 'View document',
+    href: 'https://drive.google.com/file/d/19ROBJ-U17zyn70O3lFNO1GSGSzQck0yI/view?usp=sharing',
+  },
+  {
+    emoji: '🎬',
+    tags: [
+      { label: 'Video', cls: 'tag-video' },
+      { label: 'Prof. Development & Training', cls: 'tag-training' },
+    ],
+    title: 'I-Trac Video: Sensitive Information',
+    description: 'A 1-minute, 12-second how-to video from an 11-part series supporting the I-Trac Power BI platform. Produced with Camtasia Pro and Audiate. Shared with expressed permission from Worksystems Inc.',
+    linkLabel: 'Watch video',
+    href: 'https://youtu.be/SshIlHQ-IX4?si=WDXb95nj-q9R3GeZ',
+  },
+  {
+    emoji: '🎬',
+    tags: [
+      { label: 'Video', cls: 'tag-video' },
+      { label: 'Prof. Development & Training', cls: 'tag-training' },
+    ],
+    title: 'I-Trac Video: Filtering',
+    description: 'A 3-minute, 52-second how-to video from the I-Trac series, covering data filtering workflows in the Power BI reporting tool. Produced with Camtasia Pro and Audiate. Shared with expressed permission from Worksystems Inc.',
+    linkLabel: 'Watch video',
+    href: 'https://youtu.be/UTHDPfbfTx8?si=YDvnwd2_L_oONsU6',
+  },
+  {
+    emoji: '🫀',
+    tags: [
+      { label: 'Video', cls: 'tag-video' },
+      { label: 'Instructional Design', cls: 'tag-instructional' },
+    ],
+    title: 'Cardiovascular System — Part 1',
+    description: 'A 5-minute, 18-second instructional video for an Advanced EMT course. A slide presentation converted to video using PowerPoint, Camtasia Audiate (TTS narration), and Gemini AI image generation.',
+    linkLabel: 'Watch video',
+    href: 'https://youtu.be/Eqfk74D2vz0',
+  },
+  {
+    emoji: '🌐',
+    tags: [
+      { label: 'AI & Website Design', cls: 'tag-webdev' },
+    ],
+    title: 'Rogue Careers Website',
+    description: "Assisted in the 2021 roll-out and ongoing development (through 2025) of the Rogue Workforce Partnership's career development website for youth and adults in Southern Oregon.",
+    linkLabel: 'Visit site',
+    href: 'https://roguecareers.org/',
+  },
+  {
+    emoji: '✏️',
+    tags: [
+      { label: 'Creative', cls: 'tag-creative' },
+      { label: 'AI & Website Design', cls: 'tag-webdev' },
+    ],
+    title: 'Greg Thweatt Personal Website',
+    description: 'A personal website showcasing creations, interests, and projects. Built and maintained on the WordPress platform since 2010 — a long-running creative and professional web presence.',
+    linkLabel: 'Visit site',
+    href: 'https://gregthweatt.com/',
+  },
+];
+---
+
+<section id="work" style="background: var(--paper-dark);">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">Selected Projects</p>
+      <h2 class="section-title">Work Samples</h2>
+    </div>
+
+    <div class="filter-bar" id="filterBar"></div>
+
+    <div class="cards-grid" id="cardsGrid">
+      {projects.map(project => (
+        <div class="card" data-tags={project.tags.map(t => t.label).join(',')}>
+          <div class="card-thumb"><span>{project.emoji}</span></div>
+          <div class="card-body">
+            <div class="card-tags">
+              {project.tags.map(tag => (
+                <span class={`tag ${tag.cls}`}>{tag.label}</span>
+              ))}
+            </div>
+            <h3 class="card-title">{project.title}</h3>
+            <p class="card-desc">{project.description}</p>
+            <a href={project.href} class="card-link" target="_blank" rel="noopener">{project.linkLabel}</a>
+          </div>
+        </div>
+      ))}
+      <div class="no-results" id="noResults">No samples match that filter. Try another tag or clear the filter.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Scroll reveal
+  const allCards = Array.from(document.querySelectorAll<HTMLElement>('#cardsGrid .card'));
+  if (!('IntersectionObserver' in window)) {
+    allCards.forEach(c => c.classList.add('revealed'));
+  } else {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          const delay = (allCards.indexOf(el) % 3) * 90;
+          setTimeout(() => el.classList.add('revealed'), delay);
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    allCards.forEach(c => io.observe(c));
+  }
+
+  // Tag filter
+  const filterBar = document.getElementById('filterBar')!;
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('#cardsGrid .card'));
+  const noResults = document.getElementById('noResults')!;
+  let activeTag: string | null = null;
+
+  const tagOrder: string[] = [];
+  const tagCounts: Record<string, number> = {};
+  cards.forEach(card => {
+    card.dataset.tags!.split(',').map(t => t.trim()).forEach(tag => {
+      if (!tagCounts[tag]) { tagCounts[tag] = 0; tagOrder.push(tag); }
+      tagCounts[tag]++;
+    });
+  });
+
+  const tagColors: Record<string, { bg: string; color: string }> = {
+    'Prof. Development & Training': { bg: '#4ECDC4', color: '#1a1a2e' },
+    'Documentation':                { bg: '#F4D35E', color: '#1a1a2e' },
+    'Video':                        { bg: '#FF6B6B', color: '#1a1a2e' },
+    'Instructional Design':         { bg: '#DEC0F1', color: '#1a1a2e' },
+    'AI & Website Design':          { bg: '#9BB1FF', color: '#1a1a2e' },
+    'Creative':                     { bg: '#FFE66D', color: '#1a1a2e' },
+  };
+
+  tagOrder.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.tag = tag;
+    const tc = tagColors[tag];
+    if (tc) { btn.style.background = tc.bg; btn.style.color = tc.color; btn.style.borderColor = tc.bg; }
+    btn.innerHTML = `${tag} <span class="filter-count">${tagCounts[tag]}</span>`;
+    btn.addEventListener('click', () => applyFilter(tag, btn));
+    filterBar.appendChild(btn);
+  });
+
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'filter-btn clear';
+  clearBtn.textContent = '✕ Clear Filter';
+  clearBtn.style.display = 'none';
+  clearBtn.addEventListener('click', clearFilter);
+  filterBar.appendChild(clearBtn);
+
+  function applyFilter(tag: string, btn: HTMLButtonElement) {
+    if (activeTag === tag) { clearFilter(); return; }
+    activeTag = tag;
+    filterBar.querySelectorAll<HTMLButtonElement>('.filter-btn:not(.clear)').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    clearBtn.style.display = 'inline-flex';
+    let visible = 0;
+    cards.forEach(card => {
+      const match = card.dataset.tags!.split(',').map(t => t.trim()).includes(tag);
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  function clearFilter() {
+    activeTag = null;
+    filterBar.querySelectorAll<HTMLButtonElement>('.filter-btn:not(.clear)').forEach(b => b.classList.remove('active'));
+    clearBtn.style.display = 'none';
+    cards.forEach(card => card.classList.remove('hidden'));
+    noResults.style.display = 'none';
+  }
+</script>
